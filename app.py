@@ -1,4 +1,4 @@
-
+from matcher import analyze_resume
 import streamlit as st
 from pypdf import PdfReader
 
@@ -95,6 +95,43 @@ if st.button("Analyze Resume", type="primary"):
                 )
             else:
                 st.success("Resume processed successfully.")
+
+                results = analyze_resume(
+                    resume_text,
+                    job_description
+                )
+
+                st.subheader("Compatibility Analysis")
+
+                if results["coverage"] is not None:
+                    st.metric(
+                        "Required Skills Coverage",
+                        f'{results["coverage"]}%'
+                    )
+                    st.progress(results["coverage"] / 100)
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        st.markdown("#### Matched Skills")
+                        if results["matched_skills"]:
+                            for skill in results["matched_skills"]:
+                                st.success(skill)
+                        else:
+                            st.info("No matching skills detected.")
+
+                    with col2:
+                        st.markdown("#### Skills Not Found")
+                        if results["missing_skills"]:
+                            for skill in results["missing_skills"]:
+                                st.warning(skill)
+                        else:
+                            st.success("All detected requirements covered.")
+                else:
+                    st.info(
+                        "No skills from the current skills catalog "
+                        "were detected in the job description."
+                    )
 
                 st.subheader("Document Overview")
 
